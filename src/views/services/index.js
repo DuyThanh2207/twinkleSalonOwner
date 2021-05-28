@@ -1,79 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  CBadge,
   CButton,
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
   CDataTable,
-  CForm,
-  CFormGroup,
-  CFormText,
-  CInput,
-  CLabel,
   CRow,
   CCardFooter,
-  CSelect,
+  CModal,
+  CModalBody,
+  CSpinner,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import ModalAddStaff from "./components/ModalAddStaff";
-import ModalEditStaff from "./components/ModalEditStaff";
-const usersData = [
-  {
-    name: "Farah Minard",
-    username: "fminard0",
-    email: "fminard0@blogspot.com",
-    phone_number: "734-369-4990",
-    services: "Haircut",
-  },
-  {
-    name: "Eudora Lepoidevin",
-    username: "elepoidevin1",
-    email: "elepoidevin1@yelp.com",
-    phone_number: "174-410-0422",
-    services: "Blow Hair",
-  },
-  {
-    name: "Alexia Breit",
-    username: "abreit2",
-    email: "abreit2@ameblo.jp",
-    phone_number: "294-898-2417",
-    services: "Haircut",
-  },
-  {
-    name: "Sallie MacHarg",
-    username: "smacharg3",
-    email: "smacharg3@free.fr",
-    phone_number: "881-188-2398",
-    services: "Haircut",
-  },
-  {
-    name: "Georg Kelsell",
-    username: "gkelsell4",
-    email: "gkelsell4@youku.com",
-    phone_number: "876-165-9029",
-    services: "Haircut",
-  },
-];
-const getBadge = (status) => {
-  switch (status) {
-    case "Active":
-      return "success";
-    case "Inactive":
-      return "secondary";
-    case "Pending":
-      return "warning";
-    case "Banned":
-      return "danger";
-    default:
-      return "primary";
-  }
-};
+import * as Type from "../../reusable/Constant";
+import Form from "./components/ServiceForm";
+
+const axios = require("axios");
+
 const fields = [
-  "Name",
-  "Duration",
-  "Price",
+  "name",
+  "description",
+  {
+    key: "duration",
+    label: "Duration ( minutes )",
+  },
+  "price",
   {
     key: "edit",
     label: "",
@@ -81,85 +33,280 @@ const fields = [
     filter: false,
   },
 ];
-const Posts = () => {
-  const [modalAdd, setModalAdd] = useState(false);
-  const [modalEdit, setModalEdit] = useState(false);
+const Services = () => {
+  const [modal, setModal] = useState(false);
+  const [createStatus, setCreateStatus] = useState(true);
+  const [serviceList, setServiceList] = useState([]);
+  const [service, setService] = useState({
+    name: "",
+    description: "",
+    duration: 0,
+    price: 0,
+  });
+  const [thumbnail, setThumbnail] = useState({
+    formFile: "",
+    VirtualPath: "",
+  });
+  const handleChange = (e) => {
+    e.persist();
+    setService({
+      ...service,
+      [e.target.name]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value,
+    });
+  };
+  const getAllService = async () => {
+    await axios({
+      method: "get",
+      url: `${Type.Url}/store/allServices`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+    }).then((res) => {
+      if (res && res.status === 200) {
+        setServiceList(res.data.services);
+      }
+    });
+  };
+  const createService = async () => {
+    if (service.name !== "") {
+      setModal(true);
+      const formData = new FormData();
+      formData.append("name", service.name);
+      formData.append("description", service.description);
+      formData.append("duration", service.duration);
+      formData.append("price", service.price);
+      formData.append("thumbnail", thumbnail.formFile);
+      await axios({
+        method: "post",
+        url: `${Type.Url}/store/createService`,
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          getAllService();
+          setModal(false);
+          setService({
+            name: "",
+            description: "",
+            duration: 0,
+            price: 0,
+          });
+          setThumbnail({
+            formFile: "",
+            VirtualPath: "",
+          });
+        }
+      });
+    }
+  };
+  const getEditService = (data) => {
+    setCreateStatus(false);
+    setService({
+      ...service,
+      ...data,
+    });
+    setThumbnail({
+      ...thumbnail,
+      VirtualPath: data.thumbnail,
+    });
+  };
+  const updateService = async () => {
+    if (service.name !== "") {
+      setModal(true);
+      const formData = new FormData();
+      formData.append("name", service.name);
+      formData.append("description", service.description);
+      formData.append("duration", service.duration);
+      formData.append("price", service.price);
+      formData.append("thumbnail", thumbnail.formFile);
+      await axios({
+        method: "patch",
+        url: `${Type.Url}/store/editService?id=${service._id}`,
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          getAllService();
+          setModal(false);
+          setService({
+            name: "",
+            description: "",
+            duration: 0,
+            price: 0,
+          });
+          setThumbnail({
+            formFile: "",
+            VirtualPath: "",
+          });
+        }
+      });
+    }
+  };
+  const deleteService = async (Id) => {
+    setModal(true);
+    await axios({
+      method: "delete",
+      url: `${Type.Url}/store/deleteService`,
+      data: { id: Id },
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+    }).then((res) => {
+      if (res && res.status === 200) {
+        getAllService();
+        setModal(false);
+      }
+    });
+  };
+  useEffect(() => {
+    getAllService();
+  }, []);
   return (
-    <CRow>
-      <CCol xs="12">
-        <CCard>
-          <CCardBody>
-            <div className="d-flex justify-content-end">
-              <div
-                className="btn"
-                style={{
-                  background:
-                    "linear-gradient(45deg, #9f6ccc 0%, #cc6cbc 10%, #f98358 40%,#f8bc4e)",
+    <>
+      <CRow>
+        <CCol xs="12">
+          <CCard>
+            <CCardHeader>CRUD Services</CCardHeader>
+            <CCardBody>
+              <Form
+                service={service}
+                handleChange={(e) => handleChange(e)}
+                thumbnail={thumbnail}
+                setThumbnail={setThumbnail}
+              />
+            </CCardBody>
+            <CCardFooter>
+              {createStatus ? (
+                <CButton
+                  type="submit"
+                  size="sm"
+                  color="primary"
+                  onClick={() => createService()}
+                >
+                  <CIcon name="cil-scrubber" /> Create
+                </CButton>
+              ) : (
+                <CButton
+                  type="submit"
+                  size="sm"
+                  color="primary"
+                  onClick={() => updateService()}
+                >
+                  <CIcon name="cil-scrubber" /> Submit
+                </CButton>
+              )}
+              {createStatus ? (
+                <CButton
+                  type="reset"
+                  size="sm"
+                  color="danger"
+                  className="ml-3"
+                  onClick={() => {
+                    setService({
+                      name: "",
+                      description: "",
+                      duration: 0,
+                      price: 0,
+                    });
+                    setCreateStatus(true);
+                  }}
+                >
+                  <CIcon name="cil-ban" /> Reset
+                </CButton>
+              ) : (
+                <CButton
+                  type="reset"
+                  size="sm"
+                  color="danger"
+                  className="ml-3"
+                  onClick={() => {
+                    setService({
+                      name: "",
+                      description: "",
+                      duration: 0,
+                      price: 0,
+                    });
+                    setCreateStatus(true);
+                    setThumbnail({
+                      formFile: "",
+                      VirtualPath: "",
+                    });
+                  }}
+                >
+                  <CIcon name="cil-ban" /> Cancel
+                </CButton>
+              )}
+            </CCardFooter>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CRow className="mt-3">
+        <CCol xs="12">
+          <CCard>
+            <CCardBody>
+              <CDataTable
+                columnFilter
+                tableFilter
+                items={serviceList}
+                fields={fields}
+                itemsPerPage={5}
+                pagination
+                scopedSlots={{
+                  edit: (item, index) => {
+                    return (
+                      <td className="py-2" style={{ textAlign: "center" }}>
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          shape="square"
+                          size="sm"
+                          onClick={() => {
+                            getEditService(item);
+                          }}
+                        >
+                          <CIcon name={"cilPencil"} className="mr-1" />
+                          Edit
+                        </CButton>
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          shape="square"
+                          size="sm"
+                          onClick={() => {
+                            deleteService(item._id);
+                          }}
+                        >
+                          <CIcon name={"cilTrash"} className="mr-1" />
+                          Delete
+                        </CButton>
+                      </td>
+                    );
+                  },
                 }}
-                onClick={() => setModalAdd(!modalAdd)}
-              >
-                Add New Services
-              </div>
-            </div>
-            <ModalAddStaff
-              modal={modalAdd}
-              setModal={() => setModalAdd(!modalAdd)}
-            />
-            <ModalEditStaff
-              modal={modalEdit}
-              setModal={() => setModalEdit(!modalEdit)}
-            />
-            <CDataTable
-              columnFilter
-              tableFilter
-              items={usersData}
-              fields={fields}
-              itemsPerPage={5}
-              pagination
-              scopedSlots={{
-                status: (item) => (
-                  <td>
-                    <CBadge color={getBadge(item.status)}>{item.status}</CBadge>
-                  </td>
-                ),
-                edit: (item, index) => {
-                  return (
-                    <td className="py-2" style={{ textAlign: "center" }}>
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        shape="square"
-                        size="sm"
-                        onClick={() => {
-                          setModalEdit(!modalEdit);
-                        }}
-                      >
-                        <CIcon name={"cilPencil"} className="mr-1" />
-                        View
-                      </CButton>
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        shape="square"
-                        size="sm"
-                        className="ml-2"
-                        // onClick={() => {
-                        //   toggleDetails(index);
-                        // }}
-                      >
-                        <CIcon name={"cilTrash"} className="mr-1" />
-                        Delete
-                      </CButton>
-                    </td>
-                  );
-                },
-              }}
-            />
-          </CCardBody>
-        </CCard>
-      </CCol>
-    </CRow>
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CModal show={modal} centered>
+        <CModalBody
+          className="d-flex justify-content-center"
+          style={{ padding: "5rem" }}
+        >
+          <CSpinner
+            color="warning"
+            variant="grow"
+            style={{ width: "4rem", height: "4rem" }}
+          />
+        </CModalBody>
+      </CModal>
+    </>
   );
 };
 
-export default Posts;
+export default Services;

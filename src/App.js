@@ -26,7 +26,7 @@ function PublicRouter({ children, ...rest }) {
     <Route
       {...rest}
       render={({ location }) =>
-        sessionStorage.getItem("test") ? (
+        sessionStorage.getItem("token") ? (
           <Redirect
             to={{
               pathname: "/dashboard",

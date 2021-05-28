@@ -15,13 +15,29 @@ import {
   CRow,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
+import { useHistory } from "react-router-dom";
+import * as Type from "../../../reusable/Constant";
+
+const axios = require("axios");
 
 const Login = () => {
-  const [userName, setUserName] = useState("admin");
-  const [password, setPassword] = useState("1");
-  const onLogin = () => {
-    sessionStorage.setItem("test", true);
-    window.location.reload();
+  let history = useHistory();
+  const [userName, setUserName] = useState("cattocathanh");
+  const [password, setPassword] = useState("ghG4hPyCm");
+  const onLogin = async () => {
+    await axios({
+      method: "post",
+      url: `${Type.Url}/store/login`,
+      data: {
+        username: userName,
+        password: password,
+      },
+    }).then((res) => {
+      if (res.data) {
+        sessionStorage.setItem("token", res.data.token);
+        history.push("/dashboard");
+      }
+    });
   };
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
@@ -43,7 +59,8 @@ const Login = () => {
                       <CInput
                         type="text"
                         placeholder="Username"
-                        defaultValue={userName}
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
                       />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
@@ -55,7 +72,8 @@ const Login = () => {
                       <CInput
                         type="password"
                         placeholder="Password"
-                        defaultValue={password}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
@@ -68,38 +86,8 @@ const Login = () => {
                           Login
                         </CButton>
                       </CCol>
-                      <CCol xs="6" className="text-right">
-                        <CButton color="link" className="px-0">
-                          Forgot password?
-                        </CButton>
-                      </CCol>
                     </CRow>
                   </CForm>
-                </CCardBody>
-              </CCard>
-              <CCard
-                className="text-white bg-primary py-5 d-md-down-none"
-                style={{ width: "44%" }}
-              >
-                <CCardBody className="text-center">
-                  <div>
-                    <h2>Sign up</h2>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua.
-                    </p>
-                    <Link to="/register">
-                      <CButton
-                        color="primary"
-                        className="mt-3"
-                        active
-                        tabIndex={-1}
-                      >
-                        Register Now!
-                      </CButton>
-                    </Link>
-                  </div>
                 </CCardBody>
               </CCard>
             </CCardGroup>

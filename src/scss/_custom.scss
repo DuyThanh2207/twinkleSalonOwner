@@ -24,3 +24,11 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.table__staff {
+  .table tr td {
+    padding-top: 5rem;
+  }
+  .table tr .table__img {
+    padding-top: 0;
+  }
+}
