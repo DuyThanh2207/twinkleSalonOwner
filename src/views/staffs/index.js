@@ -11,6 +11,7 @@ import CIcon from "@coreui/icons-react";
 import * as Type from "../../reusable/Constant";
 
 import StaffForm from "./components/StaffForm";
+import ServiceForm from "./components/ServiceForm";
 import moment from "moment";
 
 const axios = require("axios");
@@ -25,10 +26,6 @@ const fields = [
   "email",
   "salary",
   {
-    key: "servicesStaff",
-    label: "Services",
-  },
-  {
     key: "edit",
     label: "",
     sorter: false,
@@ -37,14 +34,15 @@ const fields = [
 ];
 const AccountsSalonStaff = () => {
   const [modal, setModal] = useState(false);
+  const [modalService, setModalService] = useState(false);
   const [createStatus, setCreateStatus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
-  const [listServices, setListServices] = useState([]);
   const [avatar, setAvatar] = useState({
     formFile: "",
     VirtualPath: "",
   });
+  const [idStaff, setIdStaff] = useState(0);
   const [staff, setStaff] = useState({
     name: "",
     username: "",
@@ -52,11 +50,6 @@ const AccountsSalonStaff = () => {
     address: "",
     salary: 0,
     startWorkingDate: "",
-    services: [
-      {
-        _id: 0,
-      },
-    ],
   });
   const getAllStaff = () => {
     axios({
@@ -71,19 +64,7 @@ const AccountsSalonStaff = () => {
       }
     });
   };
-  const getAllService = async () => {
-    await axios({
-      method: "get",
-      url: `${Type.Url}/store/allServices`,
-      headers: {
-        Authorization: `Bearer ${Type.token}`,
-      },
-    }).then((res) => {
-      if (res && res.status === 200) {
-        setListServices(res.data.services);
-      }
-    });
-  };
+
   const createStaff = async () => {
     if (
       staff.name !== "" ||
@@ -111,59 +92,21 @@ const AccountsSalonStaff = () => {
         },
       }).then((res) => {
         if (res && res.status === 200) {
-          var staffId = res.data.staff._id;
-          if (staff.services[0]._id !== "0") {
-            axios({
-              method: "patch",
-              url: `${Type.Url}/store/addServiceToStaff?id=${staffId}`,
-              data: { serviceId: staff.services[0]._id },
-              headers: {
-                Authorization: `Bearer ${Type.token}`,
-              },
-            }).then(() => {
-              getAllStaff();
-              setModal(false);
-              setCreateStatus(true);
-              setStaff({
-                name: "",
-                username: "",
-                email: "",
-                address: "",
-                salary: 0,
-                startWorkingDate: "",
-                services: [
-                  {
-                    _id: 0,
-                  },
-                ],
-              });
-              setAvatar({
-                formFile: "",
-                VirtualPath: "",
-              });
-            });
-          } else {
-            getAllStaff();
-            setModal(false);
-            setCreateStatus(true);
-            setStaff({
-              name: "",
-              username: "",
-              email: "",
-              address: "",
-              salary: 0,
-              startWorkingDate: "",
-              services: [
-                {
-                  _id: 0,
-                },
-              ],
-            });
-            setAvatar({
-              formFile: "",
-              VirtualPath: "",
-            });
-          }
+          getAllStaff();
+          setModal(false);
+          setCreateStatus(true);
+          setStaff({
+            name: "",
+            username: "",
+            email: "",
+            address: "",
+            salary: 0,
+            startWorkingDate: "",
+          });
+          setAvatar({
+            formFile: "",
+            VirtualPath: "",
+          });
         }
       });
     }
@@ -195,59 +138,21 @@ const AccountsSalonStaff = () => {
         },
       }).then((res) => {
         if (res && res.status === 200) {
-          var staffId = res.data.result._id;
-          if (staff.services[0]._id !== "0") {
-            axios({
-              method: "patch",
-              url: `${Type.Url}/store/addServiceToStaff?id=${staffId}`,
-              data: { serviceId: staff.services[0]._id },
-              headers: {
-                Authorization: `Bearer ${Type.token}`,
-              },
-            }).then(() => {
-              getAllStaff();
-              setModal(false);
-              setCreateStatus(true);
-              setStaff({
-                name: "",
-                username: "",
-                email: "",
-                address: "",
-                salary: 0,
-                startWorkingDate: "",
-                services: [
-                  {
-                    _id: 0,
-                  },
-                ],
-              });
-              setAvatar({
-                formFile: "",
-                VirtualPath: "",
-              });
-            });
-          } else {
-            getAllStaff();
-            setModal(false);
-            setCreateStatus(true);
-            setStaff({
-              name: "",
-              username: "",
-              email: "",
-              address: "",
-              salary: 0,
-              startWorkingDate: "",
-              services: [
-                {
-                  _id: 0,
-                },
-              ],
-            });
-            setAvatar({
-              formFile: "",
-              VirtualPath: "",
-            });
-          }
+          getAllStaff();
+          setModal(false);
+          setCreateStatus(true);
+          setStaff({
+            name: "",
+            username: "",
+            email: "",
+            address: "",
+            salary: 0,
+            startWorkingDate: "",
+          });
+          setAvatar({
+            formFile: "",
+            VirtualPath: "",
+          });
         }
       });
     }
@@ -276,20 +181,8 @@ const AccountsSalonStaff = () => {
         e.target.type === "checkbox" ? e.target.checked : e.target.value,
     });
   };
-  const handleService = (e) => {
-    e.persist();
-    setStaff({
-      ...staff,
-      services: [
-        {
-          _id: e.target.value,
-        },
-      ],
-    });
-  };
   useEffect(() => {
     getAllStaff();
-    getAllService();
   }, []);
   return (
     <CRow>
@@ -316,11 +209,6 @@ const AccountsSalonStaff = () => {
                     address: "",
                     salary: 0,
                     startWorkingDate: "",
-                    services: [
-                      {
-                        _id: 0,
-                      },
-                    ],
                   });
                   setAvatar({
                     formFile: "",
@@ -331,8 +219,12 @@ const AccountsSalonStaff = () => {
                 Add New Staff
               </div>
             </div>
+            <ServiceForm
+              modal={modalService}
+              setModal={() => setModalService(!modalService)}
+              idStaff={idStaff}
+            />
             <StaffForm
-              listServices={listServices}
               staff={staff}
               modal={modal}
               handleInput={(e) => handleInput(e)}
@@ -342,8 +234,21 @@ const AccountsSalonStaff = () => {
               createStatus={createStatus}
               createStaff={() => createStaff()}
               updateStaff={() => updateStaff()}
-              handleService={(e) => handleService(e)}
               loading={loading}
+              onCancel={() => {
+                setStaff({
+                  name: "",
+                  username: "",
+                  email: "",
+                  address: "",
+                  salary: 0,
+                  startWorkingDate: "",
+                });
+                setAvatar({
+                  formFile: "",
+                  VirtualPath: "",
+                });
+              }}
             />
             <CDataTable
               columnFilter
@@ -383,11 +288,6 @@ const AccountsSalonStaff = () => {
                       </td>
                     );
                 },
-                servicesStaff: (item, index) => {
-                  if (item.services.length > 0)
-                    return <td>{item.services[0].name}</td>;
-                  else return <td>{""}</td>;
-                },
                 edit: (item, index) => {
                   return (
                     <td>
@@ -398,7 +298,6 @@ const AccountsSalonStaff = () => {
                           shape="square"
                           size="sm"
                           onClick={() => {
-                            console.log(item);
                             setModal(!modal);
                             setCreateStatus(false);
                             setLoading(false);
@@ -408,14 +307,6 @@ const AccountsSalonStaff = () => {
                               startWorkingDate: moment(
                                 item.startWorkingDate
                               ).format("YYYY-MM-DD"),
-                              services: [
-                                {
-                                  _id:
-                                    item.services.length > 0
-                                      ? item.services[0]._id
-                                      : 0,
-                                },
-                              ],
                             });
                             setAvatar({
                               ...avatar,
@@ -425,6 +316,20 @@ const AccountsSalonStaff = () => {
                         >
                           <CIcon name={"cilPencil"} className="mr-1" />
                           Edit
+                        </CButton>
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          shape="square"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => {
+                            setModalService(!modalService);
+                            setIdStaff(item._id);
+                          }}
+                        >
+                          <CIcon name={"cilEye"} />
+                          Show Services
                         </CButton>
                         <CButton
                           color="primary"

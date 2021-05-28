@@ -25,12 +25,11 @@ function StaffForm({
   setAvatar,
   staff,
   handleInput,
-  listServices,
   createStatus,
   createStaff,
   updateStaff,
-  handleService,
   loading,
+  onCancel,
 }) {
   return (
     <div>
@@ -137,25 +136,6 @@ function StaffForm({
                   />
                 </CCol>
                 <CCol sm="12">
-                  <CFormGroup>
-                    <CLabel htmlFor="service">Service</CLabel>
-                    {listServices.length > 0 && (
-                      <CSelect
-                        custom
-                        name="service"
-                        id="service"
-                        value={staff.services[0]._id}
-                        onChange={(e) => handleService(e)}
-                      >
-                        <option value={0}>No Service</option>
-                        {listServices.map((item) => (
-                          <option value={item._id}>{item.name}</option>
-                        ))}
-                      </CSelect>
-                    )}
-                  </CFormGroup>
-                </CCol>
-                <CCol sm="12">
                   <CForm className="was-validated">
                     <CFormGroup>
                       <CLabel htmlFor="address">Address</CLabel>
@@ -235,7 +215,13 @@ function StaffForm({
                 Submit
               </CButton>
             )}
-            <CButton color="secondary" onClick={setModal}>
+            <CButton
+              color="secondary"
+              onClick={() => {
+                setModal();
+                onCancel();
+              }}
+            >
               Cancel
             </CButton>
           </CModalFooter>

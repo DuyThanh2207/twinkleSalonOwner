@@ -1,77 +1,126 @@
-import React, { useState } from "react";
-import { CCard, CCardBody, CCol, CRow, CButton } from "@coreui/react";
-import { Container, Grid, InputLabel } from "@material-ui/core";
-import Input from "@material-ui/core/Input";
-import { makeStyles } from "@material-ui/core/styles";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Chip from "@material-ui/core/Chip";
-import { useFormik } from "formik";
-import * as yup from "yup";
-import TextField from "@material-ui/core/TextField";
-const useStyles = makeStyles(() => ({
-  formControl: {
-    width: "100%",
-    marginTop: "1rem",
-  },
-  chips: {
-    display: "flex",
-    flexWrap: "wrap",
-    paddingLeft: "0.5rem",
-  },
-  chip: {
-    margin: 2,
-  },
-}));
-const weekdays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+import React, { useEffect, useState } from "react";
+import {
+  CCard,
+  CCardBody,
+  CCol,
+  CRow,
+  CButton,
+  CForm,
+  CFormGroup,
+  CLabel,
+  CInput,
+  CInvalidFeedback,
+  CValidFeedback,
+  CSelect,
+} from "@coreui/react";
+import * as Type from "../../reusable/Constant";
+import UpFileImage from "../../reusable/UpFile";
+import moment from "moment";
 
-const validationSchema = yup.object({
-  name: yup
-    .string("Enter your name's salon")
-    .required("Name's salon is required"),
-  address: yup.string("Enter your address").required("Address is required"),
-  openTime: yup
-    .string("Enter your open time")
-    .required("Open time is required"),
-  closeTime: yup
-    .string("Enter your close time")
-    .required("Close time is required"),
-});
+const axios = require("axios");
+
 const SetupSalon = () => {
-  const [workingDay, setWorkingDay] = useState([
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-  ]);
   const [enableEdit, setEnableEdit] = useState(false);
-  const [dataSalon, setDataSalon] = useState();
-  const classes = useStyles();
-  const formik = useFormik({
-    initialValues: {
-      name: "",
-      address: "",
-      openTime: "",
-      closeTime: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
-      setEnableEdit(!enableEdit);
-    },
+  const [showPass, setShowPass] = useState(false);
+  const [avatar, setAvatar] = useState({
+    formFile: "",
+    VirtualPath: "",
   });
-  const onGetSetupData = () => {
-    console.log(dataSalon);
+  const [dataSalon, setDataSalon] = useState({
+    name: "",
+    address: [""],
+    phoneNumber: "",
+    openTime: "",
+    closeTime: "",
+    email: "",
+    password: "",
+    storeType: "",
+  });
+  const [storeType, setStoreType] = useState([]);
+  const getSalonInfor = () => {
+    axios({
+      method: "get",
+      url: `${Type.Url}/store/me`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+    }).then((res) => {
+      if (res && res.status == 200) {
+        var temp = res.data.store.openTime.split(" ").join("").split("-");
+        setDataSalon({
+          ...dataSalon,
+          ...res.data.store,
+          openTime: temp[0],
+          closeTime: temp[1],
+        });
+        setAvatar({
+          ...avatar,
+          VirtualPath: res.data.store.avatar,
+        });
+      }
+    });
+  };
+  const getStoreType = () => {
+    axios({
+      method: "get",
+      url: `${Type.Url}/manager/allStoreTypes`,
+    }).then((res) => {
+      if (res && res.status == 200) {
+        setStoreType(res.data.storeTypes);
+      }
+    });
+  };
+  useEffect(() => {
+    getSalonInfor();
+    getStoreType();
+  }, []);
+  const handleInput = (e) => {
+    e.persist();
+    setDataSalon({
+      ...dataSalon,
+      [e.target.name]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value,
+    });
+  };
+  const onGetSetupData = async () => {
+    if (
+      dataSalon.name !== "" ||
+      dataSalon.address[0] !== "" ||
+      dataSalon.phoneNumber !== "" ||
+      dataSalon.openTime !== "" ||
+      dataSalon.closeTime !== "" ||
+      dataSalon.email !== 0 ||
+      dataSalon.password !== 0 ||
+      dataSalon.storeType !== 0
+    ) {
+      const formData = new FormData();
+      formData.append("name", dataSalon.name);
+      if (avatar.formFile !== "") formData.append("avatar", avatar.formFile);
+      formData.append("address", dataSalon.address[0]);
+      formData.append("phoneNumber", dataSalon.phoneNumber);
+      formData.append(
+        "openTime",
+        dataSalon.openTime + " - " + dataSalon.closeTime
+      );
+      formData.append("description", "");
+      formData.append("createdDate", dataSalon.createdDate);
+      formData.append("email", dataSalon.email);
+      formData.append("password", dataSalon.password);
+      formData.append("storeType", dataSalon.storeType);
+      await axios({
+        method: "patch",
+        url: `${Type.Url}/store/editStoreInformation`,
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          getSalonInfor();
+          setEnableEdit(false);
+        }
+      });
+    }
   };
   return (
     <CRow>
@@ -81,8 +130,6 @@ const SetupSalon = () => {
             <div className="d-flex justify-content-end">
               <CButton
                 color="warning"
-                size="lg"
-                shape="pill"
                 className="m-2"
                 type="submit"
                 onClick={() => setEnableEdit(!enableEdit)}
@@ -92,106 +139,218 @@ const SetupSalon = () => {
               </CButton>
             </div>
 
-            <form onSubmit={formik.handleSubmit}>
-              <TextField
-                fullWidth
-                id="name"
-                name="name"
-                label="Name"
-                type="text"
-                value={formik.values.name}
-                disabled={enableEdit ? false : true}
-                onChange={formik.handleChange}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
-              />
-              <TextField
-                fullWidth
-                className="mt-3"
-                id="address"
-                name="address"
-                label="Address"
-                type="text"
-                value={formik.values.address}
-                disabled={enableEdit ? false : true}
-                onChange={formik.handleChange}
-                error={formik.touched.address && Boolean(formik.errors.address)}
-                helperText={formik.touched.address && formik.errors.address}
-              />
-              <FormControl className={classes.formControl}>
-                <InputLabel id="working-day">Working Day</InputLabel>
-                <Select
-                  labelId="working-day"
-                  id="working-day-choice"
-                  multiple
-                  value={workingDay}
-                  onChange={(e) => setWorkingDay(e.target.value)}
-                  disabled={enableEdit ? false : true}
-                  renderValue={(selected) => (
-                    <div className={classes.chips}>
-                      {selected.map((value) => (
-                        <Chip
-                          key={value}
-                          label={value}
-                          className={classes.chip}
-                        />
-                      ))}
-                    </div>
-                  )}
-                >
-                  {weekdays.map((workingDay) => (
-                    <MenuItem key={workingDay} value={workingDay}>
-                      {workingDay}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <TextField
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                className="mt-3"
-                id="openTime"
-                name="openTime"
-                label="Open Time"
-                type="time"
-                disabled={enableEdit ? false : true}
-                value={formik.values.openTime}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.openTime && Boolean(formik.errors.openTime)
-                }
-                helperText={formik.touched.openTime && formik.errors.openTime}
-              />
-              <TextField
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                className="mt-3"
-                id="closeTime"
-                name="closeTime"
-                label="Close Time"
-                type="time"
-                disabled={enableEdit ? false : true}
-                value={formik.values.closeTime}
-                onChange={formik.handleChange}
-                error={
-                  formik.touched.closeTime && Boolean(formik.errors.closeTime)
-                }
-                helperText={formik.touched.closeTime && formik.errors.closeTime}
-              />
-              {enableEdit && (
-                <CButton
-                  color="success"
-                  size="lg"
-                  shape="pill"
-                  className="m-2"
-                  type="submit"
-                  // onClick={() => onGetSetupData()}
-                >
-                  Save
-                </CButton>
-              )}
-            </form>
+            <CForm className="form__partner">
+              <CRow>
+                <CCol sm="12">
+                  <CForm className="was-validated">
+                    <CFormGroup>
+                      <CLabel htmlFor="name">Name</CLabel>
+                      <CInput
+                        type="text"
+                        id="name"
+                        name="name"
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.name}
+                        onChange={(e) => handleInput(e)}
+                        placeholder="Enter Your Name..."
+                        required
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                </CCol>
+                <CCol sm="12">
+                  <CFormGroup>
+                    <CLabel htmlFor="address">Address</CLabel>
+                    <CInput
+                      type="text"
+                      id="address"
+                      name="address"
+                      placeholder="Enter Your Address..."
+                      disabled={enableEdit ? false : true}
+                      value={dataSalon.address[0]}
+                      onChange={(e) =>
+                        setDataSalon({
+                          ...dataSalon,
+                          address: [e.target.value],
+                        })
+                      }
+                    />
+                  </CFormGroup>
+                </CCol>
+                <CCol sm="12">
+                  <CForm className="was-validated">
+                    <CFormGroup>
+                      <CLabel htmlFor="phoneNumber">Phone Number</CLabel>
+                      <CInput
+                        type="text"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        placeholder="Enter Your phoneNumber..."
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.phoneNumber}
+                        onChange={(e) => handleInput(e)}
+                        required
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                </CCol>
+                <CCol sm="12">
+                  <CForm className="was-validated">
+                    <CFormGroup>
+                      <CLabel htmlFor="openTime">Open Time</CLabel>
+                      <CInput
+                        type="time"
+                        id="openTime"
+                        name="openTime"
+                        placeholder="Enter Your Open Time..."
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.openTime}
+                        onChange={(e) => handleInput(e)}
+                        required
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                </CCol>
+                <CCol sm="12">
+                  <CForm className="was-validated">
+                    <CFormGroup>
+                      <CLabel htmlFor="closeTime">Close Time</CLabel>
+                      <CInput
+                        type="time"
+                        id="closeTime"
+                        name="closeTime"
+                        placeholder="Enter Your Close Time..."
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.closeTime}
+                        onChange={(e) => handleInput(e)}
+                        required
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                </CCol>
+                <CCol sm="12">
+                  <CForm className="was-validated">
+                    <CFormGroup>
+                      <CLabel htmlFor="email">Email</CLabel>
+                      <CInput
+                        type="text"
+                        id="email"
+                        name="email"
+                        placeholder="Enter Your Email..."
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.email}
+                        onChange={(e) => handleInput(e)}
+                        required
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                </CCol>
+                <CCol sm="12">
+                  <UpFileImage
+                    productPictureElement={avatar}
+                    setProductPictureElement={setAvatar}
+                  />
+                </CCol>
+                <CCol sm="12" className="d-flex align-items-center">
+                  <CForm className="was-validated" style={{ width: "87%" }}>
+                    <CFormGroup>
+                      <CLabel htmlFor="password">Password</CLabel>
+                      <CInput
+                        type={showPass ? "text" : "password"}
+                        id="password"
+                        name="password"
+                        placeholder="Enter Your Password..."
+                        required
+                        // style={{ width: "95%" }}
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.password}
+                        onChange={(e) => handleInput(e)}
+                      />
+                      <CInvalidFeedback className="help-block">
+                        Please provide a valid information
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        Input provided
+                      </CValidFeedback>
+                    </CFormGroup>
+                  </CForm>
+                  <div
+                    className="btn btn-primary ml-4 mb-2"
+                    onClick={() => setShowPass(!showPass)}
+                  >
+                    Show Password
+                  </div>
+                </CCol>
+                <CCol sm="12">
+                  <CFormGroup>
+                    <CLabel htmlFor="storeType">Store Type</CLabel>
+                    {storeType.length > 0 && (
+                      <CSelect
+                        custom
+                        name="storeType"
+                        id="storeType"
+                        disabled={enableEdit ? false : true}
+                        value={dataSalon.storeType}
+                        onChange={(e) => handleInput(e)}
+                      >
+                        <option value={0}>No Service</option>
+                        {storeType.map((item) => (
+                          <option value={item._id}>{item.title}</option>
+                        ))}
+                      </CSelect>
+                    )}
+                  </CFormGroup>
+                </CCol>
+                {enableEdit && (
+                  <CCol sm="12">
+                    <CButton
+                      color="success"
+                      className="m-2"
+                      onClick={() => onGetSetupData()}
+                    >
+                      Save
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      className="m-2"
+                      onClick={() => setEnableEdit(false)}
+                    >
+                      Cancel
+                    </CButton>
+                  </CCol>
+                )}
+              </CRow>
+            </CForm>
           </CCardBody>
         </CCard>
       </CCol>
