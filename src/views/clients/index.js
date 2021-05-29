@@ -1,23 +1,13 @@
 import React, { useState } from "react";
 import {
-  CBadge,
   CButton,
   CCard,
   CCardBody,
-  CCardHeader,
   CCol,
   CDataTable,
-  CForm,
-  CFormGroup,
-  CFormText,
-  CInput,
-  CLabel,
   CRow,
-  CCardFooter,
-  CSelect,
   CCollapse,
 } from "@coreui/react";
-import CIcon from "@coreui/icons-react";
 const usersData = [
   {
     name: "Nady Thies",
@@ -46,20 +36,6 @@ const usersData = [
   },
 ];
 
-const getBadge = (status) => {
-  switch (status) {
-    case "Active":
-      return "success";
-    case "Inactive":
-      return "secondary";
-    case "Pending":
-      return "warning";
-    case "Banned":
-      return "danger";
-    default:
-      return "primary";
-  }
-};
 const fields = [
   "name",
   "arrival_time",

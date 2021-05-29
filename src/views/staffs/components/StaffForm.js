@@ -12,7 +12,6 @@ import {
   CRow,
   CValidFeedback,
   CInvalidFeedback,
-  CSelect,
   CSpinner,
 } from "@coreui/react";
 import React from "react";

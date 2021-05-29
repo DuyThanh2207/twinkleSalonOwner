@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { CCard, CCardBody, CCol, CRow } from "@coreui/react";
-import Paper from "@material-ui/core/Paper";
 import { ViewState } from "@devexpress/dx-react-scheduler";
 import {
   Scheduler,

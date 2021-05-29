@@ -6,7 +6,6 @@ import {
   CInput,
   CLabel,
   CRow,
-  CSelect,
   CValidFeedback,
   CInvalidFeedback,
 } from "@coreui/react";

@@ -9,11 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import * as Type from "../../../reusable/Constant";
 const axios = require("axios");
-Array.prototype.diff = function (a) {
-  return this.filter(function (i) {
-    return a.indexOf(i) < 0;
-  });
-};
+
 function StaffForm({ modal, setModal, idStaff }) {
   const [listServices, setListServices] = useState([]);
   const [service, setService] = useState([]);

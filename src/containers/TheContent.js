@@ -30,7 +30,6 @@ const loading = (
 );
 
 const TheContent = () => {
-  console.log(sessionStorage.getItem("test"));
   return (
     <main className="c-main">
       <CContainer fluid>

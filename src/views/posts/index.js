@@ -4,17 +4,9 @@ import {
   CButton,
   CCard,
   CCardBody,
-  CCardHeader,
   CCol,
   CDataTable,
-  CForm,
-  CFormGroup,
-  CFormText,
-  CInput,
-  CLabel,
   CRow,
-  CCardFooter,
-  CSelect,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
 import ModalAddStaff from "./components/ModalAddStaff";

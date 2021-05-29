@@ -59,7 +59,7 @@ const AccountsSalonStaff = () => {
         Authorization: `Bearer ${Type.token}`,
       },
     }).then((res) => {
-      if (res && res.status == 200 && res.data.staffs.length > 0) {
+      if (res && res.status === 200) {
         setStaffList(res.data.staffs);
       }
     });
@@ -328,7 +328,7 @@ const AccountsSalonStaff = () => {
                             setIdStaff(item._id);
                           }}
                         >
-                          <CIcon name={"cilEye"} />
+                          <CIcon name={""} />
                           Show Services
                         </CButton>
                         <CButton

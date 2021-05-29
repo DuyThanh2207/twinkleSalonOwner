@@ -15,7 +15,6 @@ import {
 } from "@coreui/react";
 import * as Type from "../../reusable/Constant";
 import UpFileImage from "../../reusable/UpFile";
-import moment from "moment";
 
 const axios = require("axios");
 
@@ -37,15 +36,15 @@ const SetupSalon = () => {
     storeType: "",
   });
   const [storeType, setStoreType] = useState([]);
-  const getSalonInfor = () => {
-    axios({
+  const getSalonInfor = async () => {
+    await axios({
       method: "get",
       url: `${Type.Url}/store/me`,
       headers: {
         Authorization: `Bearer ${Type.token}`,
       },
     }).then((res) => {
-      if (res && res.status == 200) {
+      if (res && res.status === 200) {
         var temp = res.data.store.openTime.split(" ").join("").split("-");
         setDataSalon({
           ...dataSalon,
@@ -65,7 +64,7 @@ const SetupSalon = () => {
       method: "get",
       url: `${Type.Url}/manager/allStoreTypes`,
     }).then((res) => {
-      if (res && res.status == 200) {
+      if (res && res.status === 200) {
         setStoreType(res.data.storeTypes);
       }
     });
