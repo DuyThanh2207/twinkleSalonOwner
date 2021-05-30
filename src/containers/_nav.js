@@ -20,13 +20,13 @@ const _nav = [
     _tag: "CSidebarNavItem",
     name: "Appointment",
     to: "/appointments",
-    icon: "cil-people",
+    icon: "cil-calendar",
   },
   {
     _tag: "CSidebarNavItem",
     name: "Clients",
     to: "/clients",
-    icon: "cil-pencil",
+    icon: "cil-people",
   },
   {
     _tag: "CSidebarNavItem",
@@ -38,7 +38,7 @@ const _nav = [
     _tag: "CSidebarNavItem",
     name: "Reviews",
     to: "/reviews",
-    icon: "cil-speech",
+    icon: "cil-paper-plane",
   },
   {
     _tag: "CSidebarNavItem",
@@ -50,13 +50,13 @@ const _nav = [
     _tag: "CSidebarNavItem",
     name: "Services",
     to: "/services",
-    icon: "cil-speech",
+    icon: "cil-puzzle",
   },
   {
     _tag: "CSidebarNavItem",
     name: "Setup",
     to: "/setup",
-    icon: "cil-user",
+    icon: "cil-moon",
   },
 ];
 

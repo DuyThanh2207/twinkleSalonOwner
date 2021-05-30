@@ -304,7 +304,11 @@ const SetupSalon = () => {
                     </CFormGroup>
                   </CForm>
                   <div
-                    className="btn btn-primary ml-4 mb-2"
+                    className={
+                      enableEdit
+                        ? "btn btn-primary ml-4 mb-2"
+                        : "btn btn-primary ml-4 mt-2"
+                    }
                     onClick={() => setShowPass(!showPass)}
                   >
                     Show Password
