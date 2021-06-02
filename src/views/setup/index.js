@@ -27,7 +27,7 @@ const SetupSalon = () => {
   });
   const [dataSalon, setDataSalon] = useState({
     name: "",
-    address: [""],
+    address: "",
     phoneNumber: "",
     openTime: "",
     closeTime: "",
@@ -84,7 +84,7 @@ const SetupSalon = () => {
   const onGetSetupData = async () => {
     if (
       dataSalon.name !== "" ||
-      dataSalon.address[0] !== "" ||
+      dataSalon.address !== "" ||
       dataSalon.phoneNumber !== "" ||
       dataSalon.openTime !== "" ||
       dataSalon.closeTime !== "" ||
@@ -95,7 +95,7 @@ const SetupSalon = () => {
       const formData = new FormData();
       formData.append("name", dataSalon.name);
       if (avatar.formFile !== "") formData.append("avatar", avatar.formFile);
-      formData.append("address", dataSalon.address[0]);
+      formData.append("address", dataSalon.address);
       formData.append("phoneNumber", dataSalon.phoneNumber);
       formData.append(
         "openTime",
@@ -172,13 +172,8 @@ const SetupSalon = () => {
                       name="address"
                       placeholder="Enter Your Address..."
                       disabled={enableEdit ? false : true}
-                      value={dataSalon.address[0]}
-                      onChange={(e) =>
-                        setDataSalon({
-                          ...dataSalon,
-                          address: [e.target.value],
-                        })
-                      }
+                      value={dataSalon.address}
+                      onChange={(e) => handleInput(e)}
                     />
                   </CFormGroup>
                 </CCol>
@@ -322,7 +317,7 @@ const SetupSalon = () => {
                         custom
                         name="storeType"
                         id="storeType"
-                        disabled={enableEdit ? false : true}
+                        disabled
                         value={dataSalon.storeType}
                         onChange={(e) => handleInput(e)}
                       >

@@ -58,6 +58,7 @@ const Staff = React.lazy(() => import("./views/staffs"));
 const Review = React.lazy(() => import("./views/reviews"));
 const Post = React.lazy(() => import("./views/posts"));
 const Services = React.lazy(() => import("./views/services"));
+const ServicesType = React.lazy(() => import("./views/servicesType"));
 const Setup = React.lazy(() => import("./views/setup"));
 const Widgets = React.lazy(() => import("./views/widgets/Widgets"));
 const Users = React.lazy(() => import("./views/users/Users"));
@@ -90,6 +91,11 @@ const routes = [
     path: "/services",
     name: "Services",
     component: Services,
+  },
+  {
+    path: "/services-type",
+    name: "Services Type",
+    component: ServicesType,
   },
   {
     path: "/setup",

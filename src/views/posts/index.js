@@ -1,71 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  CBadge,
   CButton,
   CCard,
   CCardBody,
   CCol,
   CDataTable,
   CRow,
+  CModal,
+  CSpinner,
+  CModalBody,
+  CModalFooter,
 } from "@coreui/react";
+import CRUD from "./component/CRUD";
 import CIcon from "@coreui/icons-react";
-import ModalAddStaff from "./components/ModalAddStaff";
-import ModalEditStaff from "./components/ModalEditStaff";
-const usersData = [
-  {
-    name: "Farah Minard",
-    username: "fminard0",
-    email: "fminard0@blogspot.com",
-    phone_number: "734-369-4990",
-    services: "Haircut",
-  },
-  {
-    name: "Eudora Lepoidevin",
-    username: "elepoidevin1",
-    email: "elepoidevin1@yelp.com",
-    phone_number: "174-410-0422",
-    services: "Blow Hair",
-  },
-  {
-    name: "Alexia Breit",
-    username: "abreit2",
-    email: "abreit2@ameblo.jp",
-    phone_number: "294-898-2417",
-    services: "Haircut",
-  },
-  {
-    name: "Sallie MacHarg",
-    username: "smacharg3",
-    email: "smacharg3@free.fr",
-    phone_number: "881-188-2398",
-    services: "Haircut",
-  },
-  {
-    name: "Georg Kelsell",
-    username: "gkelsell4",
-    email: "gkelsell4@youku.com",
-    phone_number: "876-165-9029",
-    services: "Haircut",
-  },
-];
-const getBadge = (status) => {
-  switch (status) {
-    case "Active":
-      return "success";
-    case "Inactive":
-      return "secondary";
-    case "Pending":
-      return "warning";
-    case "Banned":
-      return "danger";
-    default:
-      return "primary";
-  }
-};
+import * as Type from "../../reusable/Constant";
+const axios = require("axios");
 const fields = [
-  "Id",
-  "Title",
-  "Upload date",
+  {
+    key: "thumbnail",
+    label: "Thumbnail",
+    sorter: false,
+    filter: false,
+    _style: { width: "12%" },
+  },
+  "title",
+  "author",
+  "description",
   {
     key: "edit",
     label: "",
@@ -73,85 +33,252 @@ const fields = [
     filter: false,
   },
 ];
-const Posts = () => {
-  const [modalAdd, setModalAdd] = useState(false);
-  const [modalEdit, setModalEdit] = useState(false);
+const Partners = () => {
+  const [blogList, setBlogList] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
+  const [createStatus, setCreateStatus] = useState(true);
+  const [thumbnail, setThumbnail] = useState({
+    formFile: "",
+    VirtualPath: "",
+  });
+  const [blog, setBlog] = useState({
+    title: "",
+    description: "",
+  });
+  const getAllBlog = async () => {
+    await axios({
+      method: "get",
+      url: `${Type.Url}/manager/allBlogs`,
+    }).then((res) => {
+      if (res && res.status === 200) {
+        setBlogList(res.data.blogs);
+      }
+    });
+  };
+  const handleChange = (e) => {
+    setBlog({
+      ...blog,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const createBlog = () => {
+    if (blog.title !== "") {
+      setModal(true);
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("thumbnail", thumbnail.formFile);
+      formData.append("title", blog.title);
+      formData.append("author", "System Manager");
+      formData.append("description", blog.description);
+      formData.append("content", content);
+      axios({
+        method: "post",
+        url: `${Type.Url}/manager/createBlog`,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+        data: formData,
+      }).then(() => {
+        getAllBlog();
+        setModal(false);
+        setLoading(false);
+      });
+    }
+  };
+  const editBlog = (item) => {
+    setModal(true);
+    setBlog(item);
+    if (item.thumbnail)
+      setThumbnail({
+        ...thumbnail,
+        VirtualPath: Type.Url + item.thumbnail,
+      });
+    setContent(item.content);
+    setCreateStatus(false);
+  };
+  const onSubmitEdit = () => {
+    if (blog.title !== "") {
+      setModal(true);
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("thumbnail", thumbnail.formFile);
+      formData.append("title", blog.title);
+      formData.append("author", "System Manager");
+      formData.append("description", blog.description);
+      formData.append("content", content);
+      axios({
+        method: "patch",
+        url: `${Type.Url}/manager/editBlog?id=${blog._id}`,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+        data: formData,
+      }).then(() => {
+        setCreateStatus(true);
+        getAllBlog();
+        setModal(false);
+        setLoading(false);
+      });
+    }
+  };
+  const deleteBlog = (_id) => {
+    setModal(true);
+    setLoading(true);
+    axios({
+      method: "delete",
+      url: `${Type.Url}/manager/deleteBlog`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+      data: { id: _id },
+    }).then(() => {
+      getAllBlog();
+      setModal(false);
+      setLoading(false);
+    });
+  };
+  useEffect(() => {
+    getAllBlog();
+  }, []);
   return (
-    <CRow>
-      <CCol xs="12">
-        <CCard>
-          <CCardBody>
-            <div className="d-flex justify-content-end">
-              <div
-                className="btn"
-                style={{
-                  background:
-                    "linear-gradient(45deg, #9f6ccc 0%, #cc6cbc 10%, #f98358 40%,#f8bc4e)",
-                }}
-                onClick={() => setModalAdd(!modalAdd)}
-              >
-                Add New Post
+    <>
+      <CRow>
+        <CCol xs="12">
+          <CCard>
+            <CCardBody>
+              <div className="d-flex justify-content-end">
+                <div className="btn btn-primary" onClick={() => setModal(true)}>
+                  Add New Blog
+                </div>
               </div>
-            </div>
-            <ModalAddStaff
-              modal={modalAdd}
-              setModal={() => setModalAdd(!modalAdd)}
+              <CDataTable
+                columnFilter
+                tableFilter
+                items={blogList}
+                fields={fields}
+                itemsPerPage={5}
+                pagination
+                scopedSlots={{
+                  thumbnail: (item, index) => {
+                    if (item.thumbnail !== "")
+                      return (
+                        <img
+                          alt=""
+                          src={item.thumbnail}
+                          className="img-fluid"
+                          style={{ padding: "1.5rem" }}
+                        ></img>
+                      );
+                    else
+                      return (
+                        <img
+                          alt=""
+                          src="https://via.placeholder.com/150"
+                          className="img-fluid"
+                          style={{ padding: " 1.5rem" }}
+                        ></img>
+                      );
+                  },
+                  edit: (item, index) => {
+                    return (
+                      <td className="py-2" style={{ textAlign: "center" }}>
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          shape="square"
+                          size="sm"
+                          onClick={() => {
+                            editBlog(item);
+                          }}
+                        >
+                          <CIcon name="cilPencil" className="mr-1" />
+                          Edit
+                        </CButton>
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          shape="square"
+                          size="sm"
+                          onClick={() => {
+                            deleteBlog(item._id);
+                          }}
+                        >
+                          <CIcon name="cilTrash" className="mr-1" />
+                          Delete
+                        </CButton>
+                      </td>
+                    );
+                  },
+                }}
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CModal show={modal} size="xl" centered>
+        {loading ? (
+          <CModalBody
+            className="d-flex justify-content-center"
+            style={{ padding: "3rem" }}
+          >
+            <CSpinner
+              color="warning"
+              variant="grow"
+              style={{ width: "4rem", height: "4rem" }}
             />
-            <ModalEditStaff
-              modal={modalEdit}
-              setModal={() => setModalEdit(!modalEdit)}
-            />
-            <CDataTable
-              columnFilter
-              tableFilter
-              items={usersData}
-              fields={fields}
-              itemsPerPage={5}
-              pagination
-              scopedSlots={{
-                status: (item) => (
-                  <td>
-                    <CBadge color={getBadge(item.status)}>{item.status}</CBadge>
-                  </td>
-                ),
-                edit: (item, index) => {
-                  return (
-                    <td className="py-2" style={{ textAlign: "center" }}>
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        shape="square"
-                        size="sm"
-                        onClick={() => {
-                          setModalEdit(!modalEdit);
-                        }}
-                      >
-                        <CIcon name={"cilPencil"} className="mr-1" />
-                        View
-                      </CButton>
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        shape="square"
-                        size="sm"
-                        className="ml-2"
-                        // onClick={() => {
-                        //   toggleDetails(index);
-                        // }}
-                      >
-                        <CIcon name={"cilTrash"} className="mr-1" />
-                        Delete
-                      </CButton>
-                    </td>
-                  );
-                },
-              }}
-            />
-          </CCardBody>
-        </CCard>
-      </CCol>
-    </CRow>
+          </CModalBody>
+        ) : (
+          <>
+            <CModalBody
+              className="d-flex justify-content-center"
+              style={{ padding: "3rem" }}
+            >
+              <CRUD
+                blog={blog}
+                handleChange={(e) => handleChange(e)}
+                thumbnail={thumbnail}
+                setThumbnail={setThumbnail}
+                content={content}
+                setContent={setContent}
+              />
+            </CModalBody>
+            <CModalFooter>
+              {createStatus ? (
+                <CButton
+                  type="submit"
+                  size="sm"
+                  color="primary"
+                  onClick={() => createBlog()}
+                >
+                  <CIcon name="cil-scrubber" /> Create
+                </CButton>
+              ) : (
+                <CButton
+                  type="submit"
+                  size="sm"
+                  color="primary"
+                  onClick={() => onSubmitEdit()}
+                >
+                  <CIcon name="cil-scrubber" /> Submit
+                </CButton>
+              )}
+              <CButton
+                type="reset"
+                size="sm"
+                color="danger"
+                className="ml-3"
+                onClick={() => setModal(false)}
+              >
+                <CIcon name="cil-ban" /> Cancel
+              </CButton>
+            </CModalFooter>
+          </>
+        )}
+      </CModal>
+    </>
   );
 };
 
-export default Posts;
+export default Partners;

@@ -8,9 +8,16 @@ import {
   CRow,
   CValidFeedback,
   CInvalidFeedback,
+  CSelect,
 } from "@coreui/react";
 import UpFileImage from "../../../reusable/UpFile";
-function Form({ service, handleChange, thumbnail, setThumbnail }) {
+function Form({
+  service,
+  handleChange,
+  thumbnail,
+  setThumbnail,
+  serviceTypeList,
+}) {
   return (
     <CForm className="form__partner">
       <CRow>
@@ -95,7 +102,35 @@ function Form({ service, handleChange, thumbnail, setThumbnail }) {
             </CFormGroup>
           </CForm>
         </CCol>
-        <CCol sm="12">
+        <CCol sm="6">
+          <CForm className="was-validated mt-4" style={{ width: "100%" }}>
+            <CFormGroup>
+              <CLabel htmlFor="serviceTypeId">Service Type</CLabel>
+              <CSelect
+                custom
+                id="serviceTypeId"
+                name="serviceTypeId"
+                value={service.serviceTypeId}
+                onChange={(e) => handleChange(e)}
+                required
+              >
+                <option value={""}>No Type</option>
+                {serviceTypeList.length > 0 &&
+                  serviceTypeList.map((item) => (
+                    <option value={item._id}>{item.name}</option>
+                  ))}
+              </CSelect>
+              <CInvalidFeedback className="help-block">
+                Please provide a valid information
+              </CInvalidFeedback>
+              <CValidFeedback className="help-block">
+                Input provided
+              </CValidFeedback>
+            </CFormGroup>
+          </CForm>
+        </CCol>
+
+        <CCol sm="6">
           <UpFileImage
             productPictureElement={thumbnail}
             setProductPictureElement={setThumbnail}

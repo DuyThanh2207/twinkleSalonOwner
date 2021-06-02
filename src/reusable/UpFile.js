@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { CButton } from "@coreui/react";
-
+import * as Type from "./Constant";
 const UpFileTerm = ({ productPictureElement, setProductPictureElement }) => {
   const fileInputIcon = useRef(null);
 
@@ -20,9 +20,11 @@ const UpFileTerm = ({ productPictureElement, setProductPictureElement }) => {
     <div className="d-flex justify-content-center mt-3">
       <img
         src={
-          productPictureElement.VirtualPath !== ""
+          productPictureElement.VirtualPath === ""
+            ? "https://via.placeholder.com/150"
+            : productPictureElement.VirtualPath.trim().substr(0, 4) == "data"
             ? `${productPictureElement.VirtualPath}`
-            : "https://via.placeholder.com/150"
+            : `${Type.Url}${productPictureElement.VirtualPath}`
         }
         alt=""
         className="img-thumbnail"

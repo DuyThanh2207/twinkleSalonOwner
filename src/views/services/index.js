@@ -37,11 +37,13 @@ const Services = () => {
   const [modal, setModal] = useState(false);
   const [createStatus, setCreateStatus] = useState(true);
   const [serviceList, setServiceList] = useState([]);
+  const [serviceTypeList, setServiceTypeList] = useState([]);
   const [service, setService] = useState({
     name: "",
     description: "",
     duration: 0,
     price: 0,
+    serviceTypeId: "",
   });
   const [thumbnail, setThumbnail] = useState({
     formFile: "",
@@ -67,9 +69,20 @@ const Services = () => {
         setServiceList(res.data.services);
       }
     });
+    await axios({
+      method: "get",
+      url: `${Type.Url}/store/allServicesType`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+    }).then((res) => {
+      if (res && res.status === 200) {
+        setServiceTypeList(res.data.services);
+      }
+    });
   };
   const createService = async () => {
-    if (service.name !== "") {
+    if (service.name !== "" && service.serviceTypeId !== 0) {
       setModal(true);
       const formData = new FormData();
       formData.append("name", service.name);
@@ -77,6 +90,7 @@ const Services = () => {
       formData.append("duration", service.duration);
       formData.append("price", service.price);
       formData.append("thumbnail", thumbnail.formFile);
+      formData.append("serviceTypeId", service.serviceTypeId);
       await axios({
         method: "post",
         url: `${Type.Url}/store/createService`,
@@ -93,6 +107,7 @@ const Services = () => {
             description: "",
             duration: 0,
             price: 0,
+            serviceTypeId: "",
           });
           setThumbnail({
             formFile: "",
@@ -114,14 +129,14 @@ const Services = () => {
     });
   };
   const updateService = async () => {
-    if (service.name !== "") {
+    if (service.name !== "" && service.serviceTypeId !== 0) {
       setModal(true);
       const formData = new FormData();
       formData.append("name", service.name);
       formData.append("description", service.description);
       formData.append("duration", service.duration);
       formData.append("price", service.price);
-      formData.append("thumbnail", thumbnail.formFile);
+      formData.append("serviceTypeId", service.serviceTypeId);
       await axios({
         method: "patch",
         url: `${Type.Url}/store/editService?id=${service._id}`,
@@ -138,6 +153,7 @@ const Services = () => {
             description: "",
             duration: 0,
             price: 0,
+            serviceTypeId: "",
           });
           setThumbnail({
             formFile: "",
@@ -160,6 +176,17 @@ const Services = () => {
       if (res && res.status === 200) {
         getAllService();
         setModal(false);
+        setService({
+          name: "",
+          description: "",
+          duration: 0,
+          price: 0,
+          serviceTypeId: "",
+        });
+        setThumbnail({
+          formFile: "",
+          VirtualPath: "",
+        });
       }
     });
   };
@@ -178,6 +205,7 @@ const Services = () => {
                 handleChange={(e) => handleChange(e)}
                 thumbnail={thumbnail}
                 setThumbnail={setThumbnail}
+                serviceTypeList={serviceTypeList}
               />
             </CCardBody>
             <CCardFooter>

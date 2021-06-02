@@ -11,7 +11,6 @@ import CIcon from "@coreui/icons-react";
 import * as Type from "../../reusable/Constant";
 
 import StaffForm from "./components/StaffForm";
-import ServiceForm from "./components/ServiceForm";
 import moment from "moment";
 
 const axios = require("axios");
@@ -34,7 +33,6 @@ const fields = [
 ];
 const AccountsSalonStaff = () => {
   const [modal, setModal] = useState(false);
-  const [modalService, setModalService] = useState(false);
   const [createStatus, setCreateStatus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
@@ -42,7 +40,6 @@ const AccountsSalonStaff = () => {
     formFile: "",
     VirtualPath: "",
   });
-  const [idStaff, setIdStaff] = useState(0);
   const [staff, setStaff] = useState({
     name: "",
     username: "",
@@ -219,11 +216,6 @@ const AccountsSalonStaff = () => {
                 Add New Staff
               </div>
             </div>
-            <ServiceForm
-              modal={modalService}
-              setModal={() => setModalService(!modalService)}
-              idStaff={idStaff}
-            />
             <StaffForm
               staff={staff}
               modal={modal}
@@ -264,7 +256,7 @@ const AccountsSalonStaff = () => {
                       <td className="table__img">
                         <img
                           alt=""
-                          src={item.avatar}
+                          src={Type.Url + item.avatar}
                           style={{
                             padding: "1.5rem",
                             width: "10rem",
@@ -316,20 +308,6 @@ const AccountsSalonStaff = () => {
                         >
                           <CIcon name={"cilPencil"} className="mr-1" />
                           Edit
-                        </CButton>
-                        <CButton
-                          color="primary"
-                          variant="outline"
-                          shape="square"
-                          size="sm"
-                          className="ml-2"
-                          onClick={() => {
-                            setModalService(!modalService);
-                            setIdStaff(item._id);
-                          }}
-                        >
-                          <CIcon name={""} />
-                          Show Services
                         </CButton>
                         <CButton
                           color="primary"

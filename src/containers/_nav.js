@@ -54,6 +54,12 @@ const _nav = [
   },
   {
     _tag: "CSidebarNavItem",
+    name: "Services Type",
+    to: "/services-type",
+    icon: "cil-paper-plane",
+  },
+  {
+    _tag: "CSidebarNavItem",
     name: "Setup",
     to: "/setup",
     icon: "cil-moon",
