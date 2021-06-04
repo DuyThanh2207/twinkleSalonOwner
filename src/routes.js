@@ -59,6 +59,7 @@ const Review = React.lazy(() => import("./views/reviews"));
 const Post = React.lazy(() => import("./views/posts"));
 const Services = React.lazy(() => import("./views/services"));
 const ServicesType = React.lazy(() => import("./views/servicesType"));
+const Photos = React.lazy(() => import("./views/photos"));
 const Setup = React.lazy(() => import("./views/setup"));
 const Widgets = React.lazy(() => import("./views/widgets/Widgets"));
 const Users = React.lazy(() => import("./views/users/Users"));
@@ -96,6 +97,11 @@ const routes = [
     path: "/services-type",
     name: "Services Type",
     component: ServicesType,
+  },
+  {
+    path: "/photos",
+    name: "Photos",
+    component: Photos,
   },
   {
     path: "/setup",

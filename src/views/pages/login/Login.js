@@ -14,15 +14,13 @@ import {
   CRow,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { useHistory } from "react-router-dom";
 import * as Type from "../../../reusable/Constant";
 
 const axios = require("axios");
 
 const Login = () => {
-  let history = useHistory();
-  const [userName, setUserName] = useState("cattocathanh");
-  const [password, setPassword] = useState("ghG4hPyCm");
+  const [userName, setUserName] = useState("cattocathien");
+  const [password, setPassword] = useState("g-VnswT8N");
   const onLogin = async () => {
     await axios({
       method: "post",
@@ -34,7 +32,8 @@ const Login = () => {
     }).then((res) => {
       if (res.data) {
         sessionStorage.setItem("token", res.data.token);
-        history.push("/dashboard");
+        sessionStorage.setItem("storeName", res.data.store.name);
+        window.location.reload();
       }
     });
   };

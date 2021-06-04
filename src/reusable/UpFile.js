@@ -22,7 +22,7 @@ const UpFileTerm = ({ productPictureElement, setProductPictureElement }) => {
         src={
           productPictureElement.VirtualPath === ""
             ? "https://via.placeholder.com/150"
-            : productPictureElement.VirtualPath.trim().substr(0, 4) == "data"
+            : productPictureElement.VirtualPath.trim().substr(0, 4) === "data"
             ? `${productPictureElement.VirtualPath}`
             : `${Type.Url}${productPictureElement.VirtualPath}`
         }

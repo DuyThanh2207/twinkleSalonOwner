@@ -60,6 +60,12 @@ const _nav = [
   },
   {
     _tag: "CSidebarNavItem",
+    name: "Photos",
+    to: "/photos",
+    icon: "cil-calendar",
+  },
+  {
+    _tag: "CSidebarNavItem",
     name: "Setup",
     to: "/setup",
     icon: "cil-moon",

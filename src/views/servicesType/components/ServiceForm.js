@@ -14,6 +14,8 @@ function ServiceForm({
   setIconString,
   createServiceType,
   setAddServiceType,
+  createStatus,
+  updateServiceType,
 }) {
   return (
     <div className="d-flex justify-content-between align-items-center">
@@ -50,12 +52,21 @@ function ServiceForm({
           <CValidFeedback className="help-block">Input provided</CValidFeedback>
         </CFormGroup>
       </CForm>
-      <div
-        className="btn btn-warning ml-2 mb-2"
-        onClick={() => createServiceType()}
-      >
-        o
-      </div>
+      {createStatus ? (
+        <div
+          className="btn btn-warning ml-2 mb-2"
+          onClick={() => createServiceType()}
+        >
+          o
+        </div>
+      ) : (
+        <div
+          className="btn btn-warning ml-2 mb-2"
+          onClick={() => updateServiceType()}
+        >
+          o
+        </div>
+      )}
       <div
         className="btn btn-danger ml-2 mb-2"
         onClick={() => setAddServiceType(false)}

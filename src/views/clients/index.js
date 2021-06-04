@@ -1,66 +1,36 @@
-import React, { useState } from "react";
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCol,
-  CDataTable,
-  CRow,
-  CCollapse,
-} from "@coreui/react";
-const usersData = [
-  {
-    name: "Nady Thies",
-    arrival_time: "2020-10-28 00:36:08",
-    invoice: "$5.81",
-  },
-  {
-    name: "Jo ann Bifield",
-    arrival_time: "2021-02-21 18:29:07",
-    invoice: "$8.76",
-  },
-  {
-    name: "Merline Juan",
-    arrival_time: "2021-02-28 00:35:31",
-    invoice: "$1.11",
-  },
-  {
-    name: "Madeline Myhan",
-    arrival_time: "2020-08-31 00:16:24",
-    invoice: "$7.74",
-  },
-  {
-    name: "Elora Bauchop",
-    arrival_time: "2021-03-31 12:01:04",
-    invoice: "$3.33",
-  },
-];
-
+import React, { useState, useEffect } from "react";
+import { CCard, CCardBody, CCol, CDataTable, CRow } from "@coreui/react";
+import * as Type from "../../reusable/Constant";
+const axios = require("axios");
 const fields = [
-  "name",
-  "arrival_time",
-  "invoice",
   {
-    key: "show_services",
-    label: "",
-    _style: { width: "1%" },
+    key: "avatar",
+    label: "Avatar",
+    _style: { width: "15%" },
     sorter: false,
     filter: false,
   },
+  "name",
+  "email",
 ];
-
 const Clients = () => {
-  const [services, setService] = useState([]);
-  const toggleServices = (index) => {
-    const position = services.indexOf(index);
-    let newServices = services.slice();
-    if (position !== -1) {
-      newServices.splice(position, 1);
-    } else {
-      newServices = [...services, index];
-    }
-    setService(newServices);
+  const [customer, setCustomer] = useState([]);
+  const getAllCustomer = () => {
+    axios({
+      method: "get",
+      url: `${Type.Url}/store/allCustomers`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
+    }).then((res) => {
+      if (res && res.status === 200) {
+        setCustomer(res.data.customers);
+      }
+    });
   };
+  useEffect(() => {
+    getAllCustomer();
+  }, []);
   return (
     <CRow>
       <CCol xs="12">
@@ -69,44 +39,41 @@ const Clients = () => {
             <CDataTable
               columnFilter
               tableFilter
-              items={usersData}
+              items={customer}
               fields={fields}
               itemsPerPage={5}
               pagination
               sorter
               scopedSlots={{
-                show_services: (item, index) => {
-                  return (
-                    <td className="py-2">
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        shape="square"
-                        size="sm"
-                        onClick={() => {
-                          toggleServices(index);
-                        }}
-                      >
-                        {services.includes(index) ? "Hide" : "Show"}
-                      </CButton>
-                    </td>
-                  );
-                },
-                details: (item, index) => {
-                  return (
-                    <CCollapse show={services.includes(index)}>
-                      <CCardBody>
-                        <h4>Hiiii</h4>
-                        <p className="text-muted">User since: Helloooo</p>
-                        <CButton size="sm" color="info">
-                          User Settings
-                        </CButton>
-                        <CButton size="sm" color="danger" className="ml-1">
-                          Delete
-                        </CButton>
-                      </CCardBody>
-                    </CCollapse>
-                  );
+                avatar: (item, index) => {
+                  if (item.thumbnail !== "")
+                    return (
+                      <td className="table__img">
+                        <img
+                          alt=""
+                          src={Type.Url + "/" + item.avatar}
+                          style={{
+                            padding: "1.5rem",
+                            width: "10rem",
+                            height: "10rem",
+                          }}
+                        ></img>
+                      </td>
+                    );
+                  else
+                    return (
+                      <td className="table__img">
+                        <img
+                          alt=""
+                          src="https://via.placeholder.com/150"
+                          style={{
+                            padding: " 1.5rem",
+                            width: "10rem",
+                            height: "10rem",
+                          }}
+                        ></img>
+                      </td>
+                    );
                 },
               }}
             />

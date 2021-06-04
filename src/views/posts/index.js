@@ -24,8 +24,12 @@ const fields = [
     _style: { width: "12%" },
   },
   "title",
-  "author",
-  "description",
+
+  {
+    key: "description",
+    label: "Description",
+    _style: { width: "50%" },
+  },
   {
     key: "edit",
     label: "",
@@ -50,10 +54,13 @@ const Partners = () => {
   const getAllBlog = async () => {
     await axios({
       method: "get",
-      url: `${Type.Url}/manager/allBlogs`,
+      url: `${Type.Url}/store/allPosts`,
+      headers: {
+        Authorization: `Bearer ${Type.token}`,
+      },
     }).then((res) => {
       if (res && res.status === 200) {
-        setBlogList(res.data.blogs);
+        setBlogList(res.data.posts);
       }
     });
   };
@@ -70,12 +77,12 @@ const Partners = () => {
       const formData = new FormData();
       formData.append("thumbnail", thumbnail.formFile);
       formData.append("title", blog.title);
-      formData.append("author", "System Manager");
+      formData.append("author", sessionStorage.getItem("storeName"));
       formData.append("description", blog.description);
       formData.append("content", content);
       axios({
         method: "post",
-        url: `${Type.Url}/manager/createBlog`,
+        url: `${Type.Url}/store/createPost`,
         headers: {
           Authorization: `Bearer ${Type.token}`,
         },
@@ -93,7 +100,7 @@ const Partners = () => {
     if (item.thumbnail)
       setThumbnail({
         ...thumbnail,
-        VirtualPath: Type.Url + item.thumbnail,
+        VirtualPath: item.thumbnail,
       });
     setContent(item.content);
     setCreateStatus(false);
@@ -103,14 +110,15 @@ const Partners = () => {
       setModal(true);
       setLoading(true);
       const formData = new FormData();
-      formData.append("thumbnail", thumbnail.formFile);
+      if (thumbnail.formFile !== "")
+        formData.append("thumbnail", thumbnail.formFile);
       formData.append("title", blog.title);
-      formData.append("author", "System Manager");
+      formData.append("author", sessionStorage.getItem("storeName"));
       formData.append("description", blog.description);
       formData.append("content", content);
       axios({
         method: "patch",
-        url: `${Type.Url}/manager/editBlog?id=${blog._id}`,
+        url: `${Type.Url}/store/editPost?id=${blog._id}`,
         headers: {
           Authorization: `Bearer ${Type.token}`,
         },
@@ -128,7 +136,7 @@ const Partners = () => {
     setLoading(true);
     axios({
       method: "delete",
-      url: `${Type.Url}/manager/deleteBlog`,
+      url: `${Type.Url}store/deletePost`,
       headers: {
         Authorization: `Bearer ${Type.token}`,
       },
@@ -142,6 +150,7 @@ const Partners = () => {
   useEffect(() => {
     getAllBlog();
   }, []);
+  console.log("blogList", blogList);
   return (
     <>
       <CRow>

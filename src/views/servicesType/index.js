@@ -7,12 +7,6 @@ import {
   CModal,
   CModalBody,
   CSpinner,
-  CInput,
-  CForm,
-  CFormGroup,
-  CInvalidFeedback,
-  CValidFeedback,
-  CSelect,
 } from "@coreui/react";
 import ServiceForm from "./components/ServiceForm";
 import * as Type from "../../reusable/Constant";
@@ -21,8 +15,10 @@ const axios = require("axios");
 const Services = () => {
   const [modal, setModal] = useState(false);
   const [addServiceType, setAddServiceType] = useState(false);
+  const [createStatus, setCreateStatus] = useState(false);
   const [serviceTypeList, setServiceTypeList] = useState([]);
   const [name, setName] = useState("");
+  const [idServiceType, setIdServiceType] = useState("");
   const [iconString, setIconString] = useState("cut");
   const getAllServiceType = async () => {
     await axios({
@@ -60,6 +56,30 @@ const Services = () => {
       });
     }
   };
+  const updateServiceType = async () => {
+    if (name !== "") {
+      setModal(true);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("iconString", iconString);
+      await axios({
+        method: "patch",
+        url: `${Type.Url}/store/editServiceType?id=${idServiceType}`,
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${Type.token}`,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          getAllServiceType();
+          setModal(false);
+          setName("");
+          setAddServiceType(false);
+          setCreateStatus(false);
+        }
+      });
+    }
+  };
   const deleteServiceType = async (Id) => {
     setModal(true);
     await axios({
@@ -87,14 +107,27 @@ const Services = () => {
             <CCardBody>
               <div
                 className="btn btn-primary mb-3 "
-                onClick={() => setAddServiceType(true)}
+                onClick={() => {
+                  setAddServiceType(true);
+                  setCreateStatus(true);
+                }}
               >
                 Add Service
               </div>
               {serviceTypeList.length > 0 &&
                 serviceTypeList.map((item) => (
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div>{item.name}</div>
+                    <div
+                      onClick={() => {
+                        setAddServiceType(true);
+                        setIdServiceType(item._id);
+                        setIconString(item.iconString);
+                        setName(item.name);
+                        setCreateStatus(false);
+                      }}
+                    >
+                      {item.name}
+                    </div>
                     <div
                       className="btn btn-danger"
                       onClick={() => deleteServiceType(item._id)}
@@ -111,6 +144,8 @@ const Services = () => {
                   setIconString={(e) => setIconString(e)}
                   createServiceType={() => createServiceType()}
                   setAddServiceType={() => setAddServiceType()}
+                  createStatus={createStatus}
+                  updateServiceType={() => updateServiceType()}
                 />
               )}
             </CCardBody>
